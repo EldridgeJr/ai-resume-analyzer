@@ -48,7 +48,7 @@ const CategoryHeader = ({
 }) => {
     return (
         <div className="flex flex-row gap-4 items-center py-2">
-            <p className="text-2xl font-semibold">{title}</p>
+            <p className="text-xl font-semibold">{title}</p>
             <ScoreBadge score={categoryScore} />
         </div>
     );
@@ -71,7 +71,7 @@ const CategoryContent = ({
                             alt="score"
                             className="size-5"
                         />
-                        <p className="text-lg text-gray-500 ">{tip.tip}</p>
+                        <p className="text-base text-gray-500 ">{tip.tip}</p>
                     </div>
                 ))}
             </div>
