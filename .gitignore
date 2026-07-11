@@ -4,3 +4,10 @@
 # React Router
 /.react-router/
 /build/
+
+# IDE
+/.idea/
+
+# env files
+.env
+.env.*

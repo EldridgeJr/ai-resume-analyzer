@@ -1,75 +1,84 @@
-import React, {useState} from 'react'
-import {useDropzone} from 'react-dropzone'
-import {useCallback} from 'react'
-import {formatSize} from "~/lib/utils";
+import { useCallback } from "react";
+import { useDropzone } from "react-dropzone";
+import { IconFileText, IconUploadCloud, IconX } from "~/components/icons";
+import { cn, formatSize } from "~/lib/utils";
 
 interface FileUploaderProps {
     onFileSelect?: (file: File | null) => void;
 }
 
+const MAX_SIZE = 20 * 1024 * 1024;
+
 const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
+    const onDrop = useCallback(
+        (acceptedFiles: File[]) => {
+            onFileSelect?.(acceptedFiles[0] || null);
+        },
+        [onFileSelect]
+    );
 
-    const onDrop = useCallback((acceptedFiles: File[]) => {
-        const file = acceptedFiles[0] || null;
-    // Do something with the files
-
-        onFileSelect?.(file);
-}, [onFileSelect]);
-
-    const {getRootProps, getInputProps, isDragActive, acceptedFiles} = useDropzone({
+    const { getRootProps, getInputProps, isDragActive, acceptedFiles } = useDropzone({
         onDrop,
         multiple: false,
-        accept: { 'application/pdf': ['.pdf']},
-        maxSize: 20 * 1024 * 1024,
-    })
+        accept: { "application/pdf": [".pdf"] },
+        maxSize: MAX_SIZE,
+    });
 
     const file = acceptedFiles[0] || null;
 
-
-
     return (
-        <div className="w-full gradient-border">
-            <div {...getRootProps()}>
-                <input {...getInputProps()} />
+        <div
+            {...getRootProps()}
+            className={cn(
+                "w-full cursor-pointer rounded-2xl border-2 border-dashed bg-indigo-50/30 p-8 text-center transition-colors dark:bg-indigo-500/5",
+                isDragActive
+                    ? "border-accent bg-indigo-50/70 dark:bg-indigo-500/10"
+                    : "border-indigo-200 hover:border-indigo-300 dark:border-indigo-400/30 dark:hover:border-indigo-400/50"
+            )}
+        >
+            <input {...getInputProps()} />
 
-                <div className="space-y-4 cursor-pointer">
-
-
-                    {file ? (
-                        <div className="uploader-selected-file" onClick={(e) => e.stopPropagation()}>
-                            <img src="/images/pdf.png" alt="pdf" className="size-10" />
-                            <div className="flex items-center space-x-3">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-700 truncate max-w-xs">
-                                        {file.name}
-                                    </p>
-                                    <p className="text-sm text-gray-500">
-                                        {formatSize(file.size)}
-                                    </p>
-                                </div>
-                            </div>
-                            <button className="p-2 cursor-pointer" onClick={(e) => {
-                                onFileSelect?.(null)
-                            }}>
-                                <img src="/icons/cross.svg" alt="remove" className="w-4 h-4" />
-                            </button>
+            {file ? (
+                <div
+                    className="card-sm flex items-center justify-between gap-3 p-3 text-left"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div className="flex min-w-0 items-center gap-3">
+                        <div className="icon-tile">
+                            <IconFileText className="size-5" />
                         </div>
-                    ): (
-                        <div>
-                            <div className="mx-auto w-16 h-16 flex items-center justify-center mb-2">
-                                <img src="/icons/info.svg" alt="upload" className="size-20" />
-                            </div>
-                            <p className="text-lg text-gray-500">
-                              <span className="font-semibold">
-                                  Click to upload
-                              </span> or drag and drop
+                        <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-ink dark:text-slate-200">
+                                {file.name}
                             </p>
-                            <p className="text-lg text-gray-500">PDF ( max 20 MB )</p>
+                            <p className="text-xs text-muted dark:text-slate-400">
+                                PDF • {formatSize(file.size)}
+                            </p>
                         </div>
-                    )}
+                    </div>
+                    <button
+                        type="button"
+                        aria-label="Remove file"
+                        className="shrink-0 cursor-pointer rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-surface-2"
+                        onClick={() => onFileSelect?.(null)}
+                    >
+                        <IconX className="size-4" />
+                    </button>
                 </div>
-            </div>
+            ) : (
+                <div className="flex flex-col items-center gap-3">
+                    <div className="flex size-14 items-center justify-center rounded-2xl border border-indigo-100 bg-white text-accent shadow-sm dark:border-indigo-400/20 dark:bg-surface-2 dark:text-indigo-300">
+                        <IconUploadCloud className="size-6" />
+                    </div>
+                    <p className="text-[15px] text-muted dark:text-slate-400">
+                        <span className="font-semibold text-ink dark:text-slate-200">Click to upload</span>{" "}
+                        or drag and drop
+                    </p>
+                    <p className="text-sm text-slate-400 dark:text-slate-500">PDF • Max 20 MB</p>
+                </div>
+            )}
         </div>
-    )
-}
-export default FileUploader
+    );
+};
+
+export default FileUploader;

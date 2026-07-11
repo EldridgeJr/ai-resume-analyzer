@@ -5,6 +5,8 @@ interface Job {
     requiredSkills: string[];
 }
 
+type ApplicationStatus = "not_applied" | "applied" | "interview" | "offer" | "rejected";
+
 interface Resume {
     id: string;
     companyName?: string;
@@ -12,6 +14,11 @@ interface Resume {
     imagePath: string;
     resumePath: string;
     feedback: Feedback;
+    createdAt?: number;
+    fileName?: string;
+    fileSize?: number;
+    status?: ApplicationStatus;
+    appliedAt?: number;
 }
 
 interface Feedback {

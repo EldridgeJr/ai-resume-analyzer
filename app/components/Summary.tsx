@@ -1,67 +1,66 @@
 import ScoreGauge from "./ScoreGauge";
+import ScoreBadge from "./ScoreBadge";
+import { IconCode, IconFileText, IconGrid, IconMessage } from "~/components/icons";
+import { cn } from "~/lib/utils";
 
-const ScoreBadge = ({ score }: { score: number }) => {
-    const badgeColor =
-        score > 69
-            ? "bg-badge-green"
-            : score > 49
-                ? "bg-badge-yellow"
-                : "bg-badge-red";
-    const textColor =
-        score > 69
-            ? "text-green-600"
-            : score > 49
-                ? "text-yellow-600"
-                : "text-red-600";
-    const badgeText =
-        score > 69 ? "Strong" : score > 49 ? "Good Start" : "Needs Work";
-
-    return (
-        <div className={`score-badge ${badgeColor}`}>
-            <p className={`text-xs ${textColor} font-semibold`}>{badgeText}</p>
-        </div>
-    );
+const overallRating = (score: number) => {
+    if (score > 79) return { label: "Excellent", className: "bg-badge-green text-badge-green-text dark:bg-green-500/15 dark:text-green-300", text: "Impressive resume! Review the remaining suggestions below to make it even stronger." };
+    if (score > 64) return { label: "Good", className: "bg-indigo-50 text-accent dark:bg-indigo-500/15 dark:text-indigo-300", text: "Solid resume with room for improvement. Focus on the suggestions below to strengthen your impact." };
+    if (score > 49) return { label: "Fair", className: "bg-badge-yellow text-badge-yellow-text dark:bg-amber-500/15 dark:text-amber-300", text: "A decent starting point. Work through the suggestions below to lift your score." };
+    return { label: "Needs Work", className: "bg-badge-red text-badge-red-text dark:bg-red-500/15 dark:text-red-300", text: "This resume needs attention. The suggestions below will guide you through the biggest wins." };
 };
 
-const Category = ({ title, score }: { title: string; score: number }) => {
-    const textColor =
-        score > 69
-            ? "text-green-600"
-            : score > 49
-                ? "text-yellow-600"
-                : "text-red-600";
+const CATEGORY_META = [
+    { key: "toneAndStyle", title: "Tone & Style", Icon: IconMessage },
+    { key: "structure", title: "Structure", Icon: IconGrid },
+    { key: "content", title: "Content", Icon: IconFileText },
+    { key: "skills", title: "Skills", Icon: IconCode },
+] as const;
 
+const Category = ({
+    title,
+    score,
+    Icon,
+}: {
+    title: string;
+    score: number;
+    Icon: typeof IconMessage;
+}) => {
     return (
-        <div className="resume-summary">
-            <div className="category">
-                <div className="flex flex-row gap-2 items-center justify-center">
-                    <p className="text-xl">{title}</p>
-                    <ScoreBadge score={score} />
+        <div className="flex items-center justify-between gap-2 rounded-xl border border-black/[0.06] bg-white px-3.5 py-3 dark:border-white/10 dark:bg-surface-2">
+            <div className="flex min-w-0 items-center gap-2">
+                <div className="icon-tile size-8 rounded-lg">
+                    <Icon className="size-4" />
                 </div>
-                <p className="text-xl ">
-                    <span className={textColor}>{score}</span>/100
-                </p>
+                <p className="truncate text-sm font-semibold text-ink dark:text-slate-200">{title}</p>
+                <ScoreBadge score={score} />
             </div>
+            <p className="shrink-0 text-sm font-bold text-ink dark:text-slate-200">
+                {score}
+                <span className="font-medium text-muted dark:text-slate-400">/100</span>
+            </p>
         </div>
     );
 };
 
 const Summary = ({ feedback }: { feedback: Feedback }) => {
+    const rating = overallRating(feedback.overallScore);
+
     return (
-        <div className="bg-white rounded-2xl shadow-md w-full">
-            <div className="flex flex-row max-sm:flex-col  items-center p-4 gap-8">
-                <ScoreGauge score={feedback.overallScore} />
-                <div className="flex flex-col gap-2">
-                    <h2 className="text-2xl font-bold">Your Resume Score</h2>
-                    <p className="text-sm text-gray-500">
-                        This score is calculated based on the variables listed below.
-                    </p>
+        <div className="card flex flex-wrap items-center gap-x-8 gap-y-6 p-8 max-sm:p-5">
+            <ScoreGauge score={feedback.overallScore} size={148} />
+            <div className="flex min-w-48 max-w-60 flex-1 flex-col gap-2.5">
+                <div className="flex items-center gap-2.5">
+                    <p className="whitespace-nowrap text-xl font-bold text-ink dark:text-white">Overall Score</p>
+                    <span className={cn("score-badge", rating.className)}>{rating.label}</span>
                 </div>
+                <p className="text-sm text-muted dark:text-slate-400">{rating.text}</p>
             </div>
-            <Category title="Tone & Style" score={feedback.toneAndStyle.score} />
-            <Category title="Content" score={feedback.content.score} />
-            <Category title="Structure" score={feedback.structure.score} />
-            <Category title="Skills" score={feedback.skills.score} />
+            <div className="grid min-w-0 flex-[1.8] basis-[26rem] gap-3 sm:grid-cols-2">
+                {CATEGORY_META.map(({ key, title, Icon }) => (
+                    <Category key={key} title={title} score={feedback[key].score} Icon={Icon} />
+                ))}
+            </div>
         </div>
     );
 };
